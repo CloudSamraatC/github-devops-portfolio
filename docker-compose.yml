@@ -7,8 +7,8 @@ services:
       replicas: 3
     restart: always
     healthcheck:
-      # Non-Root Compliance Fix: Uses a native Linux pipe to check port 3000 without requiring permissions
-      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/3000 && echo -e 'GET /health HTTP/1.1\r\nHost: localhost\r\n\r\n' >&3 && cat <&3 | grep -q '200 OK'"]
+      # Universal shell execution check utilizing alpine's native nc (netcat) port validation
+      test: ["CMD-SHELL", "nc -z localhost 3000 || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 3
