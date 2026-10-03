@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 
 # Copy dependency manifests first to leverage Docker layer caching efficiently
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install --only=production
 
 # --- Stage 2: Minimal Production Runtime ---
 FROM node:20-alpine AS runner
