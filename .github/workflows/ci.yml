@@ -44,9 +44,15 @@ jobs:
 
       - name: Wait for Cluster Health Checks
         run: |
-          echo "Waiting for services to report healthy..."
+          echo "Waiting for stack initialization..."
           sleep 15
           docker compose ps
+
+      - name: Dump Container Container Boot Logs on Failure
+        if: failure()
+        run: |
+          echo "=== EXPLICIT DEBUGGING OUTPUT: APPLICATION RUNTIME LOGS ==="
+          docker compose logs web_app
 
       - name: Verify NGINX Reverse Proxy and Load Balancer Routing
         run: |
@@ -62,6 +68,5 @@ jobs:
       - name: Teardown Architecture Stack
         if: always()
         run: |
-          docker compose logs
           docker compose down --volumes
 
