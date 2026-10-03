@@ -42,7 +42,7 @@ To build and spin up the multi-instance runtime topology locally on your develop
 
 ```bash
 # 1. Clone repository layout
-git clone https://github.com
+git clone https://github.com/CloudSamraatC/github-devops-portfolio.git
 cd github-devops-portfolio
 
 # 2. Compile system images and daemonize cluster execution
