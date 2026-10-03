@@ -2,7 +2,7 @@
 FROM node:20-alpine AS builder
 WORKDIR /usr/src/app
 
-# Copy dependency manifests first to leverage Docker layer caching efficiently
+# Copy dependency manifests first to leverage Docker layer caching
 COPY package*.json ./
 RUN npm install --only=production
 
@@ -13,9 +13,10 @@ WORKDIR /usr/src/app
 # Set production environment variables
 ENV NODE_ENV=production
 
-# Copy built node_modules and source code from the builder stage
+# Core DevOps Fix: Explicitly mount modules and code cleanly into the runner
 COPY --from=builder /usr/src/app/node_modules ./node_modules
-COPY . .
+COPY package*.json ./
+COPY index.js ./
 
 # Security Hardening: Drop privileges to a non-root user
 USER node
