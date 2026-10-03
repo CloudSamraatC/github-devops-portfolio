@@ -1,4 +1,3 @@
-cat << 'EOF' > .github/workflows/ci.yml
 name: Continuous Integration
 
 on:
@@ -54,12 +53,10 @@ jobs:
           echo "Testing Public Routing Endpoint..."
           RESPONSE_1=$(curl -s http://localhost/)
           echo "Response 1: $RESPONSE_1"
-          
           if [[ ! "$RESPONSE_1" =~ "processed_by_host" ]]; then
             echo "❌ Error: Reverse proxy did not return expected application payload layout."
             exit 1
           fi
-          
           echo "✅ CI Integration Verification Check Passed Successfully!"
 
       - name: Teardown Architecture Stack
@@ -67,5 +64,4 @@ jobs:
         run: |
           docker compose logs
           docker compose down --volumes
-EOF
 
