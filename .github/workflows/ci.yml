@@ -1,0 +1,75 @@
+cat << 'EOF' > .github/workflows/ci.yml
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-validate:
+    name: Lint Code & Configurations
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Security scan App Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: app/Dockerfile
+          ignore: DL3018
+
+      - name: Security scan NGINX Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: nginx/Dockerfile
+
+  build-and-test:
+    name: Build Stack & Run Integration Tests
+    runs-on: ubuntu-latest
+    needs: lint-and-validate
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Spin Up Local Stack
+        run: |
+          docker compose up --build -d
+
+      - name: Wait for Cluster Health Checks
+        run: |
+          echo "Waiting for services to report healthy..."
+          sleep 15
+          docker compose ps
+
+      - name: Verify NGINX Reverse Proxy and Load Balancer Routing
+        run: |
+          echo "Testing Public Routing Endpoint..."
+          RESPONSE_1=$(curl -s http://localhost/)
+          echo "Response 1: $RESPONSE_1"
+          
+          if [[ ! "$RESPONSE_1" =~ "processed_by_host" ]]; then
+            echo "❌ Error: Reverse proxy did not return expected application payload layout."
+            exit 1
+          fi
+          
+          echo "✅ CI Integration Verification Check Passed Successfully!"
+
+      - name: Teardown Architecture Stack
+        if: always()
+        run: |
+          docker compose logs
+          docker compose down --volumes
+EOF

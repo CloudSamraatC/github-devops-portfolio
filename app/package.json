@@ -1,0 +1,11 @@
+cat << 'EOF' > app/package.json
+{
+  "name": "devops-demo-api",
+  "version": "1.0.0",
+  "description": "Production-grade portfolio backend",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
+EOF
