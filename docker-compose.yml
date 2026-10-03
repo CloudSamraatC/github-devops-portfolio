@@ -7,10 +7,10 @@ services:
       replicas: 3
     restart: always
     healthcheck:
-      # Uses Node's built-in network features to check health natively without wget/curl
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (res) => { if (res.statusCode === 200) process.exit(0); else process.exit(1); }).on('error', () => process.exit(1))"]
-      interval: 10s
-      timeout: 5s
+      # Non-Root Compliance Fix: Uses a native Linux pipe to check port 3000 without requiring permissions
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/3000 && echo -e 'GET /health HTTP/1.1\r\nHost: localhost\r\n\r\n' >&3 && cat <&3 | grep -q '200 OK'"]
+      interval: 5s
+      timeout: 3s
       retries: 3
       start_period: 5s
 
